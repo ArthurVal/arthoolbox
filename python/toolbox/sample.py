@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module containing utils decorator used by test scripts
+"""Module containing the sample decorator use to sample function calls
 
 Good tutorial on decorator:
 https://realpython.com/primer-on-python-decorators/
@@ -10,7 +10,17 @@ Decorators list:
 import time, threading, functools, math
 
 class sample:
-    """Compute timing parameters like the mean/stddev period call for function
+    """Compute timing parameters like the mean/stddev period call for a function
+
+    This class is a decorator use to sample the __call__() (mean and
+    stddev period call in sec).
+
+    It can also be use to obtain the number of time the function has been
+    called (_n_call), the last measurement done on the period (_last_period).
+
+    Ultimately, you can use the _updated variable (threading.Condition) to sync
+    up your code when measurement has been done as it will notify you when new
+    measurement is used to update the mean/stddev computation.
 
     Attributs
     ---------
@@ -35,6 +45,7 @@ class sample:
         The variance period computed recursivelly in sec
     _stddev_period: float
         The stddev period computed recursivelly in sec (_variance_period)^(1/2)
+
     """
     def __init__(self, function):
         functools.update_wrapper(self, function)
@@ -45,12 +56,18 @@ class sample:
     @property
     def _variance_period(self):
         with self._updated:
-            return (self.__variance_tmp / (self._n_measurement)) if self._n_measurement != 0 else None
+            if self._n_measurement != 0:
+                return (self.__variance_tmp / (self._n_measurement))
+            else:
+                return None
 
     @property
     def _stddev_period(self):
         with self._updated:
-            return math.sqrt(self._variance_period) if self._n_measurement != 0 else None
+            if self._n_measurement != 0:
+                return math.sqrt(self._variance_period)
+            else:
+                return None
 
     def _reset_sampling(self):
         with self._updated:
