@@ -7,7 +7,10 @@ https://realpython.com/primer-on-python-decorators/
 Decorators list:
 - sample | no args | Compute mean period, stddev period, last_call delta T etc..
 """
-import time, threading, functools, math
+import time                     # Default time measurement function (time.time)
+import threading                # threading.condition
+import functools                # functools.update_wrapper
+import math                     # math.sqrt
 
 class sample:
     """Compute timing parameters like the mean/stddev period call for a function
