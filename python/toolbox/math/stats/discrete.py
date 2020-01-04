@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-"""Module containing function used for statistical computations
+"""Module containing function used for statistical computations on discrete sets
 
 Function list:
-- 
+- mean
+- variance
+- stddev
 """
 import math
 
@@ -12,7 +14,7 @@ def mean(values):
 
     Attributs
     ---------
-    values : list(numbers)
+    values : iterable(numbers)
         The input list of values we need to compute the mean of
 
     Returns
@@ -20,7 +22,7 @@ def mean(values):
     float
         The mean computed
     """
-    return math.fsum(values) / len(values)
+    return (math.fsum(values) / len(values))
 
 
 def variance(values, mean_computed = None):
@@ -60,12 +62,3 @@ def stddev(values, mean_computed = None):
         The stddev computed
     """
     return math.sqrt(variance(values, mean_computed))
-
-
-def update_mean():
-    pass
-
-
-def update_variance():
-    pass
-
