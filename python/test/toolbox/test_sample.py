@@ -1,43 +1,6 @@
 #!/usr/bin/env python3
-
-import logging.config, sys
-
-logging.config.dictConfig(
-    {
-        'version': 1,
-        'disable_existing_loggers': True,
-        'formatters': {
-            'simple': {
-                'format': '[%(levelname)-8s]: %(message)s'
-            },
-        },
-        'handlers': {
-            'console':{
-                'level':'DEBUG',
-                'class':'logging.StreamHandler',
-                'stream': sys.stdout,
-                'formatter': 'simple'
-            },
-        },
-        'loggers': {
-            '': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
-            'test': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'test.sample': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-        }
-    }
-)
-
-
-from toolbox.sample import sample, time, math
+import logging, time, math
+from toolbox.sample import sample
 
 sample_log = logging.getLogger('test.sample')
 
@@ -86,7 +49,7 @@ def test_sample_attr_init(function, log = sample_log.getChild('attr_init')):
     log.info("{0:*^50}".format(" DONE "))
 
 
-def test_sample_output(function, input_args = range(50),log = sample_log.getChild('output')):
+def test_sample_output(function, input_args = range(50), log = sample_log.getChild('output')):
     log.info("{0:*^50}".format(" Testing output determinism "))
     for input_used in input_args:
         output_expected = function._sample__function(input_used)
@@ -147,3 +110,5 @@ def test_sample_computation(function, input_args = range(50), log = sample_log.g
          " sleeping time used ({})")\
         .format(function._mean_period, sleep_time_sec)
     log.info("{0:*^50}".format(" DONE "))
+
+
