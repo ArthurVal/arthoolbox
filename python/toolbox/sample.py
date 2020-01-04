@@ -5,7 +5,7 @@ Good tutorial on decorator:
 https://realpython.com/primer-on-python-decorators/
 
 Decorators list:
-- sample | no args | Compute mean period, stddev period, last_call delta T etc..
+- sample | (opt) time_function | Compute mean period, stddev period, last_call delta T etc..
 """
 import time                     # Default time measurement function (time.time)
 import threading                # threading.condition
