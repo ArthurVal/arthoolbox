@@ -2,7 +2,7 @@
 
 from . import log as parent_log, logging
 import math
-import toolbox.math.stats.discrete as stats
+import arthoolbox.math.stats.discrete as stats
 
 module_log = parent_log.getChild('discrete')
 

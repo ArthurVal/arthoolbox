@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math
-import toolbox.math.stats.continuous as stats
+import arthoolbox.math.stats.continuous as stats
 
 from . import log as parent_log, logging
 

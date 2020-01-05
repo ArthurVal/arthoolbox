@@ -3,7 +3,7 @@
 from . import log as parent_log
 
 import time, math
-from toolbox.sample import sample
+from arthoolbox.sample import sample
 
 module_log = parent_log.getChild('sample')
 
