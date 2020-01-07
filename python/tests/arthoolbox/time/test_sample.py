@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-
-from . import log as parent_log
-
 import time, math
-from arthoolbox.time.sample import sample
+from . import log as parent_log, sample
 
 module_log = parent_log.getChild('sample')
 
@@ -52,7 +49,7 @@ def test_sample_attr_init(function, log = module_log.getChild('attr_init')):
     log.info("{0:*^50}".format(" DONE "))
 
 
-def test_sample_output(function, input_args = range(50), log = module_log.getChild('output')):
+def test_sample_output(function, input_args, log = module_log.getChild('output')):
     log.info("{0:*^50}".format(" Testing output determinism "))
     for input_used in input_args:
         output_expected = function._sample__function(input_used)
@@ -73,7 +70,7 @@ def test_sample_output(function, input_args = range(50), log = module_log.getChi
     log.info("{0:*^50}".format(" DONE "))
 
 
-def test_sample_computation(function, input_args = range(50), log = module_log.getChild('computation')):
+def test_sample_computation(function, input_args, log = module_log.getChild('computation')):
     log.info("{0:*^50}".format(" Testing sample expected computations "))
     sleep_time_sec = 50e-3
 
