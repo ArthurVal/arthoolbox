@@ -1,3 +1,3 @@
-import logging
+from .. import logging, log as parent_log
 
-log = logging.getLogger('test.arthoolbox')
+log = parent_log.getChild('arthoolbox')
