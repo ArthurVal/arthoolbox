@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """conftest.py file use to configurate pytest by adding hooks/params...
 """
-import pytest, logging
+import pytest
 
 ###############################################################################
 #                                PYTEST - HOOKS                               #
@@ -20,6 +20,12 @@ def pytest_configure(config):
 
     :arg _pytest.config.Config config: pytest config object
     """
+    import logging.config, yaml
+
+    with open('tests/logging.yaml', 'rt') as log_yml_file:
+        config = yaml.safe_load(log_yml_file.read())
+        logging.config.dictConfig(config)
+
 
 def pytest_sessionstart(session):
     """ called after the ``Session`` object has been created and before performing collection

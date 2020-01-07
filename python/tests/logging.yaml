@@ -1,0 +1,54 @@
+version: 1
+disable_existing_loggers: true
+
+formatters:
+  simple:
+    format: '[%(levelname)s-8]: %(message)s - %(name)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+  # file:
+  #   class: logging.FileHandler
+  #   level: DEBUG
+  #   filename: logs/test.log
+
+root:
+    level: NOTSET
+    handlers: [console]
+    propogate: yes
+
+
+loggers:
+
+  test:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox.sample:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox.math:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox.math.stats:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox.math.stats.discrete:
+    level: DEBUG
+    propagate: yes
+
+  test.arthoolbox.math.stats.continuous:
+    level: DEBUG
+    propagate: yes
