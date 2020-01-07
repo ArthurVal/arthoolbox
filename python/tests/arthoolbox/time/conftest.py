@@ -17,10 +17,7 @@ def add_one(x):
                     [1, 1],
                     list(range(50)) ,
                 ],
-                ids = [
-                    "2_calls",
-                    "50_calls"
-                ]
+                ids = lambda x: "{}_calls".format(len(x))
 )
 def input_args(request):
     return request.param
@@ -40,4 +37,3 @@ def input_args(request):
 def function(request):
     yield request.param
     request.param._reset_sampling()
-
