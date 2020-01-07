@@ -12,27 +12,29 @@ def add_one(x):
 
 ###############################################################################
 #                          TEST - ARTHOOLBOX FIXTURES                         #
-@pytest.fixture(scope = "module",
-                params = [
-                    [1, 1],
-                    list(range(50)) ,
-                ],
-                ids = lambda x: "{}_calls".format(len(x))
+@pytest.fixture(
+    scope = "module",
+    params = [
+        [1, 1],
+        list(range(50)) ,
+    ],
+    ids = lambda x: "{}_calls".format(len(x))
 )
 def input_args(request):
     return request.param
 
-@pytest.fixture(scope = "function",
-                params = [
-                    sample(add_one),
-                    sample(time_function = time.time)(add_one),
-                    sample(time_function = time.perf_counter)(add_one),
-                ],
-                ids = [
-                    "sample_default",
-                    "sample_time",
-                    "sample_perf_counter"
-                ]
+@pytest.fixture(
+    scope = "function",
+    params = [
+        sample(add_one),
+        sample(time_function = time.time)(add_one),
+        sample(time_function = time.perf_counter)(add_one),
+    ],
+    ids = [
+        "sample_default",
+        "sample_time",
+        "sample_perf_counter"
+    ]
 )
 def function(request):
     yield request.param

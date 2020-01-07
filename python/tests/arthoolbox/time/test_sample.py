@@ -112,3 +112,7 @@ def test_sample_computation(function, input_args, log = module_log.getChild('com
     log.info("{0:*^50}".format(" DONE "))
 
 
+
+ # TODO:
+ # - Tester la synchro avec _updated
+ # - ?
