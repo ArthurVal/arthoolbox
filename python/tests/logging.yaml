@@ -22,33 +22,39 @@ root:
     handlers: [console]
     propogate: yes
 
-
 loggers:
-
-  test:
+  tests:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox:
+# ---------- ARTHOOLBOX
+  tests.arthoolbox:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox.sample:
+# ---------- TIME
+  tests.arthoolbox.time:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox.math:
+  tests.arthoolbox.time.sample:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox.math.stats:
+# ---------- MATH
+  tests.arthoolbox.math:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox.math.stats.discrete:
+# ---------- STATS
+  tests.arthoolbox.math.stats:
     level: DEBUG
     propagate: yes
 
-  test.arthoolbox.math.stats.continuous:
+  tests.arthoolbox.math.stats.discrete:
+    level: DEBUG
+    propagate: yes
+
+  tests.arthoolbox.math.stats.continuous:
     level: DEBUG
     propagate: yes

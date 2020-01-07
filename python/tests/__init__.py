@@ -1,4 +1,4 @@
 import logging
 
-log = logging.getLogger('test')
+log = logging.getLogger('tests')
 log.debug("Package loaded")
