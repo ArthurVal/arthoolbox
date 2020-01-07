@@ -40,21 +40,3 @@ loggers:
   tests.arthoolbox.time.sample:
     level: DEBUG
     propagate: yes
-
-# ---------- MATH
-  tests.arthoolbox.math:
-    level: DEBUG
-    propagate: yes
-
-# ---------- STATS
-  tests.arthoolbox.math.stats:
-    level: DEBUG
-    propagate: yes
-
-  tests.arthoolbox.math.stats.discrete:
-    level: DEBUG
-    propagate: yes
-
-  tests.arthoolbox.math.stats.continuous:
-    level: DEBUG
-    propagate: yes
