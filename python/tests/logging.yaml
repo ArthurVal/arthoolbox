@@ -3,7 +3,7 @@ disable_existing_loggers: true
 
 formatters:
   simple:
-    format: '[%(levelname)s-8]: %(message)s - %(name)s'
+    format: '[%(levelname)-8s]: %(message)s - %(name)s'
 
 handlers:
   console:
