@@ -2,8 +2,9 @@
 """Module containing specifics statistics function like recursive computation...
 
 Function list:
-- update_mean()     | Compute an updated mean
-- update_variance() | Compute a new variance
+- update_mean()        | Compute an updated mean
+- update_variance()    | Compute a new variance
+- update_sum_squares() | Compute a new sum of squares of differences from mean
 """
 
 def update_mean(new_data, old_mean, num_data):
@@ -70,3 +71,43 @@ def update_variance(new_data, old_variance, new_mean, old_mean, num_data):
             / num_data
         )
     )
+
+
+def update_sum_squares(new_data, old_sum_squares, new_mean, old_mean):
+    """Compute the update of sum of squares of differences from the current mean
+
+    From the previously computed sum SUM_n-1, the new and old mean M_n and
+    M_n-1 and the new measurement X_n, we compute an update value of the new
+    sum of squares differences noted SUM_n using the formula:
+    SUM_n = SUM_n-1 +(X_n - M_n)*(X_n - M_n-1)
+
+    See: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+
+    This SUM can be use to compute the variance and sample variance:
+    Vn = SUM_n/n
+    Sn = SUM_n/(n+1)
+
+    This make the variance computation suffer less from floating point
+    computation instabilities.
+
+    Notes
+    -----
+    This formula may be unstable due to the floating point calculation issues.  
+
+    Parameters
+    ----------
+    new_data: int or decimal
+        The new measurement X_n
+    old_sum_squares: int or decimal
+        The sum of squares SUM_n-1 computed previously
+    new_mean: int or decimal
+        The mean M_n computed on the current step n
+    old_mean: int or decimal
+        The mean M_n-1 computed previously
+
+    Returns
+    -------
+    float
+        The new sum of squares SUM_n updated with X_n, SUM_n-1, M_n and M_n-1
+    """
+    return (old_sum_squares + ((new_data - old_mean)*(new_data - new_mean)))
