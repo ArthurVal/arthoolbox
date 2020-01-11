@@ -144,6 +144,16 @@ class OnlineStatistics(object):
         self.updated = threading.Condition(condition_lock)
         self.reset()
 
+    def __str__(self):
+        return ("[n = {}]: Xn = {}, Mn = {}, Vn = {}, Sn = {}")\
+            .format(
+                self.number_of_measurement,
+                self.measurement,
+                self.mean,
+                self.variance,
+                self.sampled_variance
+            )
+
     @property
     def number_of_measurement(self):
         return self.__n
