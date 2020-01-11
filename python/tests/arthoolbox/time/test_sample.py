@@ -7,7 +7,6 @@ module_log = parent_log.getChild('sample')
 def test_sample_attr(function, log = module_log.getChild('attr')):
     log.info("{0:*^50}".format(" Testing attributes "))
     for attr_name in [
-            "period_updated",
             "last_call",
             "period",
             "_sample__function",

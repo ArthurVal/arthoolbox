@@ -8,7 +8,6 @@ Decorators list:
 - sample | (opt) time_function | Compute mean period, stddev period, last_call delta T etc..
 """
 import time                     # Default time measurement function (time.time)
-import threading                # threading.condition
 import functools                # functools.update_wrapper
 from arthoolbox.math.statistics import OnlineStatistics
 
@@ -22,9 +21,7 @@ class sample(object):
     called (period.number_of_measurement - 1), the last measurement done on the
     period (period.measurement).
 
-    Ultimately, you can use the period_updated variable (threading.Condition)
-    to sync up your code when measurement has been done as it will notify you
-    when new measurement is used to update the mean/variance computation.
+
 
     Attributs
     ---------
@@ -34,9 +31,6 @@ class sample(object):
         The function use to get the current time (default to time.time)
     last_call: float
         The last __get_time() returned value use to compute measurements
-    period_updated: threading.Condition
-        Condition used to indicate that the function has been called, and
-        therefore we computed new values
     period: arthoolbox.math.statistics.OnlineStatistics
         OnlineStatistics object use to compute mean and variance online
 
@@ -44,7 +38,6 @@ class sample(object):
     def __init__(self, _function = None, *, time_function = time.time):
         self.__function = _function
         self.__get_time = time_function
-        self.period_updated = threading.Condition()
         self.last_call = None
         self.period = OnlineStatistics()
 
@@ -69,16 +62,12 @@ class sample(object):
 
         else:
             # Here normal function call
-            with self.period_updated:
-                now = self.__get_time()
+            now = self.__get_time()
 
-                if self.last_call is not None:
-                    # Update with new measurement + Update last_call with now
-                    self.period.measurement = now - self.last_call
+            if self.last_call is not None:
+                # Update with new measurement + Update last_call with now
+                self.period.measurement = now - self.last_call
 
-                    # Notify new measurement
-                    self.period_updated.notify_all()
-
-                self.last_call = now
+            self.last_call = now
 
             return self.__function(*args, **kwargs)
