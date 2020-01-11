@@ -94,10 +94,6 @@ def update_sum_squares(new_data, old_sum_squares, new_mean, old_mean):
     This make the variance computation suffer less from floating point
     computation instabilities.
 
-    Notes
-    -----
-    This formula may be unstable due to the floating point calculation issues.  
-
     Parameters
     ----------
     new_data: int or decimal
