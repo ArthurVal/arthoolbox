@@ -1,1 +1,18 @@
-# TODO
+#+title: Arthoolbox python API
+#+author: Arthur Valiente
+#+email: valiente.arthur@gmail.com
+
+These directory contains the arthoolbox source code API (and tests associated)
+for the python langage.
+
+* Getting started
+** Prerequisites
+*** Runtime dependancies
+    The arthoolbox package has been developped and tested using python v3.7.3.
+*** Tests dependancies
+    All tests are run using [[https://docs.pytest.org/en/latest/contents.html][pytest]].
+** Installation
+TODO setup.py etc...
+* Running tests
+TODO explaine pytest
+
