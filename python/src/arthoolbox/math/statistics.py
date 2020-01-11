@@ -140,22 +140,19 @@ class OnlineStatistics(object):
         The variance Vn computed using recurrent equation.
     sampled_variance: float
         The sampled variance Sn computed using recurrent equation.
+    stats: collections.namedtuple(Stats, ['n', 'X', 'Mean', 'Var', 'SVar'])
+        The concatenated stats in one namedtuple
     """
-    CurrentStat = collections.namedtuple('Stats', ['n', 'X', 'Mean', 'Var'])
-
+    CurrentStat = collections.namedtuple(
+        'Stats',
+        ['n', 'X', 'Mean', 'Var', 'SVar']
+    )
     def __init__(self, condition_lock = None):
         self.updated = threading.Condition(condition_lock)
         self.reset()
 
     def __str__(self):
-        return str(
-            OnlineStatistics.CurrentStat(
-                n = self.number_of_measurement,
-                X = self.measurement,
-                Mean = self.mean,
-                Var = self.variance,
-            )
-        )
+        return str(self.stats)
 
     @property
     def number_of_measurement(self):
@@ -197,6 +194,16 @@ class OnlineStatistics(object):
     @property
     def sampled_variance(self):
         return (self.__sum_squares / (self.__n - 1)) if self.__n > 1 else None
+
+    @property
+    def stats(self):
+        return OnlineStatistics.CurrentStat(
+            n = self.number_of_measurement,
+            X = self.measurement,
+            Mean = self.mean,
+            Var = self.variance,
+            SVar = self.sampled_variance,
+        )
 
     def reset(self):
         with self.updated:
