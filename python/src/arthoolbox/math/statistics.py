@@ -7,7 +7,7 @@ Functions list:
 - update_sum_squares() | Compute a new sum of squares of differences from mean
 
 Classes list:
-- OnlineVariableStatistics | Store the mean of a variable computed recursively
+- OnlineStatistics | Automatically compute the stats of a specific measurement
 """
 import threading                # Condition
 import collections              # namedtupled
