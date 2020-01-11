@@ -12,7 +12,7 @@ import threading                # threading.condition
 import functools                # functools.update_wrapper
 from arthoolbox.math.statistics import OnlineStatistics
 
-class sample:
+class sample(object):
     """Compute timing parameters like the mean/stddev period call for a function
 
     This class is a decorator use to sample the __call__() (mean and
