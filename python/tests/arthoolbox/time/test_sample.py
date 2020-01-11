@@ -9,8 +9,7 @@ def test_sample_attr(function, log = module_log.getChild('attr')):
     for attr_name in [
             "last_call",
             "period",
-            "_sample__function",
-            "_sample__get_time",
+            "__wrapped__",
     ]:
         assert hasattr(function, attr_name), \
             "Sampled function should have {} attribute"\
@@ -39,7 +38,7 @@ def test_sample_attr_init(function, log = module_log.getChild('attr_init')):
 def test_sample_output(function, input_args, log = module_log.getChild('output')):
     log.info("{0:*^50}".format(" Testing output determinism "))
     for input_used in input_args:
-        output_expected = function._sample__function(input_used)
+        output_expected = function.__wrapped__(input_used)
         output_obtained = function(input_used)
         log.debug(
             "sampled f({}) = {} (expecting: {})"
