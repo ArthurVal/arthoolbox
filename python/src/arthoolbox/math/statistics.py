@@ -124,6 +124,18 @@ class OnlineStatistics(object):
     up your code when measurement has been done as it will notify you when new
     measurement is used to update the mean/variance computation.
 
+    Warning
+    -------
+    Be aware that, when accessing the 'variance', 'sampled_variance' and
+    'stats' variables, those need to be computed based on the current internal
+    state of the OnlineStatistics object.
+    In order to avoid dead locks (because the 'updated' condition variable can
+    be initialized with a threading.Lock), we don't lock 'updated' for these
+    readings, but only when computing new values with 'measurement'.
+    If race conditions could appears between '.measurement = ' usage and
+    '.variance' (measurement updated in an other thread...), we highly advise
+    you to lock '.updated' BEFORE reading either 'variance', 'sampled_variance'
+    or 'stats'.
 
     Attributs
     ---------
