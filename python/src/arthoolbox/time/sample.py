@@ -36,7 +36,13 @@ class sample(object):
 
     """
     def __init__(self, _function = None, *, time_function = time.time):
-        self.__function = _function
+        if _function:
+            functools.update_wrapper(self, _function)
+            self.__function = _function
+
+        else:
+            self.__function = None
+
         self.__get_time = time_function
         self.last_call = None
         self.period = OnlineStatistics()
