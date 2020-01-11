@@ -9,7 +9,8 @@ Functions list:
 Classes list:
 - OnlineVariableStatistics | Store the mean of a variable computed recursively
 """
-import threading                # Use for Condition objects
+import threading                # Condition
+import collections              # namedtupled
 
 def update_mean(new_data, old_mean, num_data):
     """Compute a new mean recursively using the old mean and new measurement
@@ -140,19 +141,21 @@ class OnlineStatistics(object):
     sampled_variance: float
         The sampled variance Sn computed using recurrent equation.
     """
+    CurrentStat = collections.namedtuple('Stats', ['n', 'X', 'Mean', 'Var'])
+
     def __init__(self, condition_lock = None):
         self.updated = threading.Condition(condition_lock)
         self.reset()
 
     def __str__(self):
-        return ("[n = {}]: Xn = {}, Mn = {}, Vn = {}, Sn = {}")\
-            .format(
-                self.number_of_measurement,
-                self.measurement,
-                self.mean,
-                self.variance,
-                self.sampled_variance
+        return str(
+            OnlineStatistics.CurrentStat(
+                n = self.number_of_measurement,
+                X = self.measurement,
+                Mean = self.mean,
+                Var = self.variance,
             )
+        )
 
     @property
     def number_of_measurement(self):
