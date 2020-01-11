@@ -9,6 +9,8 @@ Functions list:
 Classes list:
 - OnlineVariableStatistics | Store the mean of a variable computed recursively
 """
+import threading                # Use for Condition objects
+
 def update_mean(new_data, old_mean, num_data):
     """Compute a new mean recursively using the old mean and new measurement
 
@@ -116,13 +118,21 @@ def update_sum_squares(new_data, old_sum_squares, new_mean, old_mean):
 
 
 class OnlineStatistics(object):
-    """Class use to update online the mean and variance variable of a variable
+    """Class use to update online the mean and variance of a measurement
 
-    This class, when assigned to a numerical value, automatically computed its
+    This class, when receiving a new measurement, automatically compute its
     mean and variance/stdev recursively.
+
+    Ultimately, you can use the updated variable (threading.Condition) to sync
+    up your code when measurement has been done as it will notify you when new
+    measurement is used to update the mean/variance computation.
+
 
     Attributs
     ---------
+    updated: threading.Condition
+        Condition used to indicate that a measurement has been add, and
+        therefore we computed new values of mean/variance...
     number_of_measurement: uint
         The number of time this variable has been updated (n)
     measurement: float
@@ -134,7 +144,8 @@ class OnlineStatistics(object):
     sampled_variance: float
         The sampled variance Sn computed using recurrent equation.
     """
-    def __init__(self):
+    def __init__(self, condition_lock = None):
+        self.updated = threading.Condition(condition_lock)
         self.reset()
 
     @property
@@ -147,22 +158,24 @@ class OnlineStatistics(object):
 
     @measurement.setter
     def measurement(self, new_measure):
-        self.__n += 1
-        self.__measurement = new_measure
-        self.__mean, old_mean = (
-            update_mean(
+        with self.updated:
+            self.__n += 1
+            self.__measurement = new_measure
+            self.__mean, old_mean = (
+                update_mean(
+                    new_data = self.__measurement,
+                    old_mean = self.__mean,
+                    num_data = self.__n
+                ),
+                self.__mean
+            )
+            self.__sum_squares = update_sum_squares(
                 new_data = self.__measurement,
-                old_mean = self.__mean,
-                num_data = self.__n
-            ),
-            self.__mean
-        )
-        self.__sum_squares = update_sum_squares(
-            new_data = self.__measurement,
-            old_sum_squares = self.__sum_squares,
-            new_mean = self.__mean,
-            old_mean = old_mean
-        )
+                old_sum_squares = self.__sum_squares,
+                new_mean = self.__mean,
+                old_mean = old_mean
+            )
+            self.updated.notify_all()
 
     @property
     def mean(self):
@@ -177,7 +190,8 @@ class OnlineStatistics(object):
         return (self.__sum_squares / (self.__n - 1)) if self.__n > 1 else None
 
     def reset(self):
-        self.__n = 0
-        self.__measurement = None
-        self.__mean = 0.
-        self.__sum_squares = 0.
+        with self.updated:
+            self.__n = 0
+            self.__measurement = None
+            self.__mean = 0.
+            self.__sum_squares = 0.
