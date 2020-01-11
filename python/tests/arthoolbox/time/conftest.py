@@ -38,4 +38,5 @@ def input_args(request):
 )
 def function(request):
     yield request.param
-    request.param._reset_sampling()
+    request.param.last_call = None
+    request.param.period.reset()

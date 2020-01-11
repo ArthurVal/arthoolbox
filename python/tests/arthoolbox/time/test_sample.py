@@ -7,18 +7,11 @@ module_log = parent_log.getChild('sample')
 def test_sample_attr(function, log = module_log.getChild('attr')):
     log.info("{0:*^50}".format(" Testing attributes "))
     for attr_name in [
-            "_n_call",
-            "_updated",
-            "_n_measurement",
-            "_last_period",
-            "_mean_period",
-            "_variance_period",
-            "_stddev_period",
-            "_reset_sampling",
+            "period_updated",
+            "last_call",
+            "period",
             "_sample__function",
             "_sample__get_time",
-            "_sample__last_call",
-            "_sample__variance_tmp",
     ]:
         assert hasattr(function, attr_name), \
             "Sampled function should have {} attribute"\
@@ -29,12 +22,7 @@ def test_sample_attr(function, log = module_log.getChild('attr')):
 def test_sample_attr_init(function, log = module_log.getChild('attr_init')):
     log.info("{0:*^50}".format(" Testing initial values "))
     for attr_name, expected_init_value in [
-            ("_n_call", 0),
-            ("_n_measurement", 0),
-            ("_last_period", None),
-            ("_mean_period", None),
-            ("_variance_period", None),
-            ("_stddev_period", None),
+            ("last_call", None),
     ]:
         log.debug(
             "{}: {} (expecting: {})".format(
@@ -78,41 +66,31 @@ def test_sample_computation(function, input_args, log = module_log.getChild('com
         function(arg)
         time.sleep(sleep_time_sec)
 
-    for attr_name, expected_value in [
-            ("_n_call", len(input_args)),
-            ("_n_measurement", len(input_args) - 1),
-    ]:
-        log.debug(
-            "{}: {} (expecting: {})".format(
-                attr_name,
-                getattr(function, attr_name),
-                expected_value
-            )
+    log.debug(
+        "period.number_of_measurement: {} (expecting: {})".format(
+            function.period.number_of_measurement,
+            (len(input_args) - 1)
         )
-        assert getattr(function, attr_name) == expected_value, \
-            "Sampled function attr {} should be equals to {}"\
-            .format(attr_name, expected_value)
+    )
+    assert function.period.number_of_measurement == (len(input_args) - 1), \
+        "Sampled function number_of_measurement {} should be equals to {}"\
+        .format(function.period.number_of_measurement, len(input_args) - 1)
 
-    log.debug("_variance_period: {}".format(function._variance_period))
-    log.debug("_stddev_period: {}".format(function._stddev_period))
-    assert math.isclose(function._variance_period,
-                        function._stddev_period*function._stddev_period,
-                        rel_tol = 0.05), \
-        ("Sampled function computed variance ({}) should be the square of "
-         " the stddev ({})")\
-        .format(function._variance_period, function._stddev_period)
+    log.debug("mean: {}".format(function.period.mean))
+    log.debug("variance: {}".format(function.period.variance))
+    log.debug("sampled_variance: {}".format(function.period.sampled_variance))
 
-    log.debug("_mean_period: {}".format(function._mean_period))
-    assert math.isclose(function._mean_period,
+    assert math.isclose(function.period.mean,
                         sleep_time_sec,
                         rel_tol = 0.05), \
         ("Sampled function computed period ({}) should be equals to the"
          " sleeping time used ({})")\
-        .format(function._mean_period, sleep_time_sec)
+        .format(function.period.mean, sleep_time_sec)
+
     log.info("{0:*^50}".format(" DONE "))
 
 
 
  # TODO:
- # - Tester la synchro avec _updated
+
  # - ?
