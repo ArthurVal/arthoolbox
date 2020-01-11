@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Module containing specifics statistics function like recursive computation...
 
-Function list:
+Functions list:
 - update_mean()        | Compute an updated mean
 - update_variance()    | Compute a new variance
 - update_sum_squares() | Compute a new sum of squares of differences from mean
-"""
 
+Classes list:
+- OnlineVariableStatistics | Store the mean of a variable computed recursively
+"""
 def update_mean(new_data, old_mean, num_data):
     """Compute a new mean recursively using the old mean and new measurement
 
@@ -111,3 +113,71 @@ def update_sum_squares(new_data, old_sum_squares, new_mean, old_mean):
         The new sum of squares SUM_n updated with X_n, SUM_n-1, M_n and M_n-1
     """
     return (old_sum_squares + ((new_data - old_mean)*(new_data - new_mean)))
+
+
+class OnlineStatistics(object):
+    """Class use to update online the mean and variance variable of a variable
+
+    This class, when assigned to a numerical value, automatically computed its
+    mean and variance/stdev recursively.
+
+    Attributs
+    ---------
+    number_of_measurement: uint
+        The number of time this variable has been updated (n)
+    measurement: float
+        The new measurement at step = n (Xn)
+    mean: float
+        The mean Mn computed using recurrent equation.
+    variance: float
+        The variance Vn computed using recurrent equation.
+    sampled_variance: float
+        The sampled variance Sn computed using recurrent equation.
+    """
+    def __init__(self):
+        self.reset()
+
+    @property
+    def number_of_measurement(self):
+        return self.__n
+
+    @property
+    def measurement(self):
+        return self.__measurement
+
+    @measurement.setter
+    def measurement(self, new_measure):
+        self.__n += 1
+        self.__measurement = new_measure
+        self.__mean, old_mean = (
+            update_mean(
+                new_data = self.__measurement,
+                old_mean = self.__mean,
+                num_data = self.__n
+            ),
+            self.__mean
+        )
+        self.__sum_squares = update_sum_squares(
+            new_data = self.__measurement,
+            old_sum_squares = self.__sum_squares,
+            new_mean = self.__mean,
+            old_mean = old_mean
+        )
+
+    @property
+    def mean(self):
+        return self.__mean if self.__n > 0 else None
+
+    @property
+    def variance(self):
+        return (self.__sum_squares / self.__n) if self.__n > 0 else None
+
+    @property
+    def sampled_variance(self):
+        return (self.__sum_squares / (self.__n - 1)) if self.__n > 1 else None
+
+    def reset(self):
+        self.__n = 0
+        self.__measurement = None
+        self.__mean = 0.
+        self.__sum_squares = 0.

@@ -130,3 +130,106 @@ def test_update_sum_squares(data):
              .format(i)
 
     log.info("{0:*^50}".format(" DONE "))
+
+
+def test_OnlineStatistics(data):
+    log = module_log.getChild('OnlineStatistics')
+    log.info("{0:*^50}".format(" Testing OnlineStatistics class "))
+
+    log.info("-- Testing initialization")
+    online_data = arthstats.OnlineStatistics()
+
+    assert online_data.number_of_measurement == 0, \
+        "OnlineStatistics number_of_measurement should be 0 when instanciated"
+
+    assert online_data.measurement == None, \
+        "OnlineStatistics measurement should be None when instanciated"
+
+    assert online_data.mean == None, \
+        "OnlineStatistics mean should be None when instanciated"
+
+    assert online_data.variance == None, \
+        "OnlineStatistics variance should be None when instanciated"
+
+    assert online_data.sampled_variance == None, \
+        "OnlineStatistics sampled_variance should be None when instanciated"
+
+    log.info("-- Testing measurement updates")
+    log.debug(
+        "Use the OnlineStatistics class on {} data".format(len(data))
+    )
+    for i, single_data in enumerate(data, start = 1):
+
+        online_data.measurement = single_data
+
+        assert online_data.number_of_measurement == i, \
+            ("OnlineStatistics number_of_measurement should increments each"
+             " time we add a measurement")
+
+        assert online_data.measurement == single_data, \
+            ("OnlineStatistics measurement should be equals to the last"
+             " measurment")
+
+        assert online_data.mean != None, \
+            "OnlineStatistics mean should not be None when measurement is added"
+
+        assert math.isclose(
+            st.mean(data[:(i)]),
+            online_data.mean,
+            rel_tol = 0.005), \
+            ("The OnlineStatistics mean computed on step n = {} doesn't match"
+             " the arithmetic mean computed with statistics.mean").format(i)
+
+
+        assert online_data.variance != None, \
+            ("OnlineStatistics variance should not be None when measurement is"
+             " added")
+
+        assert math.isclose(
+            st.pvariance(data[:(i)], mu = online_data.mean),
+            online_data.variance,
+            rel_tol = 0.005), \
+            ("The OnlineStatistics variance computed on step n = {} doesn't "
+             "match the variance computed with statistics.pvariance")\
+             .format(i)
+
+
+        if i < 2:
+            assert online_data.sampled_variance == None, \
+                ("OnlineStatistics sampled_variance should still be None when"
+                 " the number of measurement is inferior to 2")
+
+        else:
+            assert online_data.sampled_variance != None, \
+                ("OnlineStatistics sampled_variance should not be None when"
+                 " the number of measurement is superior to 2")
+
+            assert math.isclose(
+                st.variance(data[:(i)], xbar = online_data.mean),
+                online_data.sampled_variance,
+                rel_tol = 0.005), \
+                ("The OnlineStatistics sampled_variance computed on step n = {}"
+                 " doesn't match the sampled variance computed with "
+                 "statistics.variance")\
+                 .format(i)
+
+
+    log.info("-- Testing .reset()")
+    online_data.reset()
+
+    assert online_data.number_of_measurement == 0, \
+        "OnlineStatistics number_of_measurement should be 0 after reset"
+
+    assert online_data.measurement == None, \
+        "OnlineStatistics measurement should be None after reset"
+
+    assert online_data.mean == None, \
+        "OnlineStatistics mean should be None after reset"
+
+    assert online_data.variance == None, \
+        "OnlineStatistics variance should be None after reset"
+
+    assert online_data.sampled_variance == None, \
+        "OnlineStatistics sampled_variance should be None after reset"
+
+    log.info("{0:*^50}".format(" DONE "))
