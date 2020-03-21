@@ -26,7 +26,7 @@ class _LazyDict:
             return self.__func(*self.__args, **self.__kwargs)
 
         def __repr__(self):
-            return "{}{}".format(
+            return "<Not instanciated: {}{}>".format(
                 repr(self.__func.__name__),
                 self.__args + tuple(self.__kwargs.items())
             )
@@ -35,28 +35,11 @@ class _LazyDict:
     def __init__(self, **kwargs):
         self.__dict = kwargs
 
-
     def __repr__(self):
-        return "{{{}}}".format(
-            ", ".join(
-                [
-                    "{key}: {value}".format(
-                        key = repr(k),
-                        value = repr(v)
-                        if not isinstance(v, _LazyDict.LazyValue)
-                        else "<Not Instanciated: {}>".format(repr(v))
-
-                    )
-                    for k,v in self.__dict.items()
-                ]
-            )
-        )
-
-
+        return repr(self.__dict)
 
     def __setitem__(self, key, value):
         self.__dict[key] = value
-
 
     def __getitem__(self, key):
         if key not in self.__dict:
