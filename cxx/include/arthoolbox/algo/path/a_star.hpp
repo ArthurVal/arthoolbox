@@ -1,9 +1,10 @@
-#include <deque>      // deque -> output container
+
 #include <functional> // functors
 #include <limits>     // numeric_limits -> inf
 #include <queue>      // priority_queue
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace arthoolbox {
 namespace algo {
@@ -12,18 +13,18 @@ namespace path {
 /**
  * @brief Compute the shortest path using A* algorithm
  *
- * @tparam PositionCoordinatesType The type use as coordinates
- * @tparam PositionEqual           Use to compare 2 PositionCoordinatesType
- * @tparam Hash                    Use to hash a PositionCoordinatesType
+ * @tparam T     The type use as coordinates inside the map
+ * @tparam Hash  Use to hash a T
+ * @tparam Equal Use to compare 2 T (equals)
  *
- * @param[in] from_position                The starting node
- * @param[in] to_position                  The targetted node
- * @param[in] computeHeuristic             A function called to compute the
- * heuristic from one node
- * @param[in] getNeighborWeightedPositions A function use to retreive valid
- * weighted neighbors around a node
+ * @param[in] from_position      The starting node
+ * @param[in] to_position        The targetted node
+ * @param[in] heuristicFrom      A function called to compute the heuristic from
+ *                               one node
+ * @param[in] getWeightedNeighOf A function use to retreive valid weighted
+ *                               neighbors list around a node
  *
- * @return std::deque of position with .front() being the targeted position
+ * @return std::vector of position with .back() being the INITIAL position
  *
  * @details
  * This function try to find the shortest path, from one point to an other using
@@ -34,26 +35,17 @@ namespace path {
  * distance to 1 node.
  *
  * @warning
- * The output deque is 'reversed' (i.e. the path from start to finish must be
- * read from .back() to .front())
- *
- * @warning
- * The first node doesn't correspond to the from_position arg, but the first
- * node next to this one
+ * The output vector is 'reversed' (i.e. the path from start to finish must be
+ * read from .back() to front / reverse iterated)
  */
-template <class PositionCoordinatesType,
-          class Hash = std::hash<PositionCoordinatesType>,
-          class PositionEqual = std::equal_to<PositionCoordinatesType>>
-std::deque<PositionCoordinatesType> aStarShortestPath(
-    const PositionCoordinatesType &from_position,
-    const PositionCoordinatesType &to_position,
-    std::function<double(const PositionCoordinatesType &)> computeHeuristic,
-    std::function<std::vector<std::pair<PositionCoordinatesType, double>>(
-        const PositionCoordinatesType &)>
-        getNeighborWeightedPositions) {
-  auto position_are_equals = PositionEqual();
+template <class T, class Hash = std::hash<T>, class Equal = std::equal_to<T>>
+std::vector<T>
+aStarShortestPath(const T &from_position, const T &to_position,
+                  std::function<double(const T &)> heuristicFrom,
+                  std::function<std::vector<std::pair<T, double>>(const T &)>
+                      getWeightedNeighOf) {
 
-  typedef std::pair<PositionCoordinatesType, double> node_t;
+  typedef std::pair<T, double> node_t;
 
   auto compare_f_score = [](const node_t &lhs, const node_t &rhs) {
     return lhs.second > rhs.second;
@@ -63,28 +55,22 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
                               decltype(compare_f_score)>
       node_heap_t;
 
-  typedef std::unordered_map<PositionCoordinatesType, double, Hash,
-                             PositionEqual>
-      score_map_t;
+  typedef std::unordered_set<T, Hash, Equal> visited_pos_set_t;
+  typedef std::unordered_map<T, double, Hash, Equal> score_map_t;
+  typedef std::unordered_map<T, T, Hash, Equal> path_map_t;
 
-  typedef std::unordered_map<PositionCoordinatesType, PositionCoordinatesType,
-                             Hash, PositionEqual>
-      path_map_t;
-
-  typedef std::unordered_set<PositionCoordinatesType, Hash, PositionEqual>
-      visited_pos_set_t;
-
-  std::deque<PositionCoordinatesType> output_path;
+  std::vector<T> output_path;
   node_heap_t node_heap(compare_f_score);
   visited_pos_set_t visited_position(0);
   score_map_t g_score_map;
   path_map_t came_from;
+  auto position_are_equals = Equal();
 
-  node_heap.emplace(from_position, computeHeuristic(from_position));
+  node_heap.emplace(from_position, heuristicFrom(from_position));
   g_score_map.emplace(from_position, 0);
 
   while (!node_heap.empty()) {
-    PositionCoordinatesType current_position;
+    T current_position;
     double current_f_score;
 
     std::tie(current_position, current_f_score) = node_heap.top();
@@ -93,6 +79,9 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
     visited_position.insert(current_position);
 
     if (position_are_equals(current_position, to_position)) {
+
+      // FIXME: Find the size before push_back ?
+
       // Found -> reconstruct path
       output_path.push_back(current_position);
       auto pos_it = came_from.find(current_position);
@@ -100,14 +89,13 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
         output_path.push_back(pos_it->second);
         pos_it = came_from.find(pos_it->second);
       }
-
+      output_path.shrink_to_fit();
       break;
 
     } else {
       // explore
-      for (const auto &neighbour_info :
-           getNeighborWeightedPositions(current_position)) {
-        PositionCoordinatesType neighbour_position;
+      for (const auto &neighbour_info : getWeightedNeighOf(current_position)) {
+        T neighbour_position;
         double neighbour_distance;
 
         std::tie(neighbour_position, neighbour_distance) = neighbour_info;
@@ -130,8 +118,7 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
           if (visited_position.find(neighbour_position) ==
               visited_position.end()) {
             node_heap.emplace(neighbour_position,
-                              new_g_score +
-                                  computeHeuristic(neighbour_position));
+                              new_g_score + heuristicFrom(neighbour_position));
           }
         }
       }
@@ -142,19 +129,13 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
 }
 
 // Specialised overload with Neighbors distance = 1
-template <class PositionCoordinatesType,
-          class Hash = std::hash<PositionCoordinatesType>,
-          class PositionEqual = std::equal_to<PositionCoordinatesType>>
-std::deque<PositionCoordinatesType> aStarShortestPath(
-    const PositionCoordinatesType &from_position,
-    const PositionCoordinatesType &to_position,
-    std::function<double(const PositionCoordinatesType &)> computeHeuristic,
-    std::function<
-        std::vector<PositionCoordinatesType>(const PositionCoordinatesType &)>
-        getNeighborPositions) {
-  auto position_are_equals = PositionEqual();
+template <class T, class Hash = std::hash<T>, class Equal = std::equal_to<T>>
+std::vector<T>
+aStarShortestPath(const T &from_position, const T &to_position,
+                  std::function<double(const T &)> heuristicFrom,
+                  std::function<std::vector<T>(const T &)> getNeighOf) {
 
-  typedef std::pair<PositionCoordinatesType, double> node_t;
+  typedef std::pair<T, double> node_t;
 
   auto compare_f_score = [](const node_t &lhs, const node_t &rhs) {
     return lhs.second > rhs.second;
@@ -164,28 +145,22 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
                               decltype(compare_f_score)>
       node_heap_t;
 
-  typedef std::unordered_map<PositionCoordinatesType, double, Hash,
-                             PositionEqual>
-      score_map_t;
+  typedef std::unordered_set<T, Hash, Equal> visited_pos_set_t;
+  typedef std::unordered_map<T, double, Hash, Equal> score_map_t;
+  typedef std::unordered_map<T, T, Hash, Equal> path_map_t;
 
-  typedef std::unordered_map<PositionCoordinatesType, PositionCoordinatesType,
-                             Hash, PositionEqual>
-      path_map_t;
-
-  typedef std::unordered_set<PositionCoordinatesType, Hash, PositionEqual>
-      visited_pos_set_t;
-
-  std::deque<PositionCoordinatesType> output_path;
+  std::vector<T> output_path;
   node_heap_t node_heap(compare_f_score);
   visited_pos_set_t visited_position(0);
   score_map_t g_score_map;
   path_map_t came_from;
+  auto position_are_equals = Equal();
 
-  node_heap.emplace(from_position, computeHeuristic(from_position));
+  node_heap.emplace(from_position, heuristicFrom(from_position));
   g_score_map.emplace(from_position, 0);
 
   while (!node_heap.empty()) {
-    PositionCoordinatesType current_position;
+    T current_position;
     double current_f_score;
 
     std::tie(current_position, current_f_score) = node_heap.top();
@@ -194,6 +169,9 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
     visited_position.insert(current_position);
 
     if (position_are_equals(current_position, to_position)) {
+
+      // FIXME: Find the size before push_back ?
+
       // Found -> reconstruct path
       output_path.push_back(current_position);
       auto pos_it = came_from.find(current_position);
@@ -201,17 +179,15 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
         output_path.push_back(pos_it->second);
         pos_it = came_from.find(pos_it->second);
       }
-
+      output_path.shrink_to_fit();
       break;
 
     } else {
       // explore
-      for (const auto &neighbour_position :
-           getNeighborPositions(current_position)) {
+      for (const auto &neighbour_position : getNeighOf(current_position)) {
 
         // Compute the possible new score from this node to the neighbor
-        double new_g_score = g_score_map[current_position] + 1;
-
+        double new_g_score = g_score_map[current_position] + 1.;
         auto neighbour_g_score_it = g_score_map.find(neighbour_position);
 
         // Get the neighbour g_score
@@ -227,8 +203,7 @@ std::deque<PositionCoordinatesType> aStarShortestPath(
           if (visited_position.find(neighbour_position) ==
               visited_position.end()) {
             node_heap.emplace(neighbour_position,
-                              new_g_score +
-                                  computeHeuristic(neighbour_position));
+                              new_g_score + heuristicFrom(neighbour_position));
           }
         }
       }
