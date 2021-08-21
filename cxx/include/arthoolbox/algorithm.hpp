@@ -1,5 +1,8 @@
 #pragma once
 
+namespace arthoolbox {
+namespace algorithm {
+
 /**
  * @brief Mutate a range of elements by swaping the first element with value if
  * value is found
@@ -23,4 +26,7 @@ constexpr ForwardOutputIt swap_front(
     if(value_found != first) std::iter_swap(value_found, first);
     return first + 1;
   } else return first;
+}
+
+}
 }
