@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <iterator>
+
 namespace arthoolbox {
 namespace algorithm {
 
