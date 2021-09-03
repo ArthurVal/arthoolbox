@@ -46,22 +46,22 @@ constexpr ForwardOutputIt swap_front(
  * again.
  *
  * @tparam InputIt Input Iterator (not mutated) of the first range
- * @tparam ForwardOutputIt1 Iterator of the 2nd list (Elements in the list will
+ * @tparam ForwardOutputIt Iterator of the 2nd list (Elements in the list will
  * be swapped)
- * @tparam OutputIt2 Output iterator use to store missing values
+ * @tparam OutputIt Output iterator use to store missing values
  *
  * @param[in] first1,last1 The range of elements to examine
  * @param[in] first2,last2 The range of elements to search in
  * @param[out] d_first The beginning of the destination range
  *
- * @returns ForwardOutputIt1 Iterator to the first element in [first2, last2[
+ * @returns ForwardOutputIt Iterator to the first element in [first2, last2[
  * that as not been found inside [first1, last1[
  */
-template <class InputIt, class ForwardOutputIt1, class OutputIt2>
-constexpr ForwardOutputIt1 array_difference(InputIt first1, InputIt last1,
-                                            ForwardOutputIt1 first2,
-                                            ForwardOutputIt1 last2,
-                                            OutputIt2 d_first) {
+template <class InputIt, class ForwardOutputIt, class OutputIt>
+constexpr ForwardOutputIt array_difference(InputIt first1, InputIt last1,
+                                           ForwardOutputIt first2,
+                                           ForwardOutputIt last2,
+                                           OutputIt d_first) {
   auto first2_not_found_value = first2;
   for (auto value = first1; value != last1; ++value) {
     auto value_found = std::find(first2_not_found_value, last2, *value);
