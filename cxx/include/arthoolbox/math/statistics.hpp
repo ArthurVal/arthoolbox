@@ -115,17 +115,19 @@ public:
   RecurrentStatistics() : number_of_measurements_(0), mean_(), sum_square_(){};
 
   //! Constructor with non default parameters
-  RecurrentStatistics(U init_mean, S init_sum_square)
+  RecurrentStatistics(const U &init_mean, const S &init_sum_square)
       : number_of_measurements_(0), mean_(init_mean),
         sum_square_(init_sum_square){};
 
   /**
-   *  \brief Reset the statistics (N, MEAN, SUM set to 0)
+   *  \brief Reset the statistics (N set to 0)
+   *  \param[in] mean The new default value used as mean
+   *  \param[in] sum_square The new default value used as sum_square
    */
-  void reset() noexcept {
+  void reset(const U &mean, const S &sum_square) noexcept {
     number_of_measurements_ = 0;
-    mean_ = 0;
-    sum_square_ = 0;
+    mean_ = mean;
+    sum_square_ = sum_square;
   };
 
   /**
