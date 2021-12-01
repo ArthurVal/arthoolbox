@@ -54,7 +54,6 @@ struct Statistics : public ::testing::Test {
 
 Statistics::DataHolder Statistics::data;
 
-
 TEST_F(Statistics, RecurringMeanComputation) {
   data_type mean_computed_online = 0;
 
@@ -74,7 +73,7 @@ TEST_F(Statistics, RecurringVarianceComputation) {
   for (std::size_t i = 0; i < data.samples.size(); i++) {
     const data_type &sample = data.samples[i];
     const auto old_mean = mean_computed_online;
-    const auto n = i+1;
+    const auto n = i + 1;
 
     mean_computed_online =
         update_recurring_mean(sample, mean_computed_online, n);
@@ -84,6 +83,20 @@ TEST_F(Statistics, RecurringVarianceComputation) {
   }
 
   ASSERT_NEAR(variance_computed_online, data.variance, 1e-6);
+}
+
+TEST_F(Statistics, RecurringStatistics) {
+  RecurrentStatistics<data_type, double> statistician;
+  for (const auto &sample : data.samples)
+    statistician.updateWith(sample);
+
+  ASSERT_EQ(statistician.getNumberOfMeasurements(), data.samples.size());
+  ASSERT_NEAR(statistician.getMean(), data.mean, 1e-6);
+  ASSERT_NEAR(statistician.getVariance(), data.variance, 1e-6);
+
+  statistician.reset(0, 0);
+  ASSERT_EQ(statistician.getNumberOfMeasurements(), 0);
+  ASSERT_EQ(statistician.getMean(), 0);
 }
 
 } // namespace
