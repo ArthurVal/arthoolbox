@@ -74,4 +74,6 @@ if(${ARTBX_ENABLE_TESTING})
   add_subdirectory(tests)
 endif(${ARTBX_ENABLE_TESTING})
 
-
+if(${ARTBX_ENABLE_BENCHMARK})
+  add_subdirectory(benchmarks)
+endif(${ARTBX_ENABLE_BENCHMARK})
