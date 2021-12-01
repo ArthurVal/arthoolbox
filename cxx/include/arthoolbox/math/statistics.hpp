@@ -32,7 +32,7 @@ template <class T, class U = T>
 constexpr U update_recurring_mean(const T &new_sample, const U &old_mean,
                                   const std::size_t data_number) noexcept {
   return (old_mean + (new_sample - old_mean) / data_number);
-};
+}
 
 /**
  *  \brief Update the statistical variance using recurrent equation
@@ -64,7 +64,7 @@ constexpr T update_recurring_variance(const T &new_sample,
   return (old_variance +
           ((new_sample - new_mean) * (new_sample - old_mean) - old_variance) /
               data_number);
-};
+}
 
 /**
  *  \brief Update the statistical sum of squares using recurrent equation
@@ -98,7 +98,7 @@ constexpr T
 update_recurring_sum_square(const T &new_sample, const S &old_sum_square,
                             const U &new_mean, const U &old_mean) noexcept {
   return (old_sum_square + (new_sample - new_mean) * (new_sample - old_mean));
-};
+}
 
 /**
  *  \brief Enables online recurrent statistics computation of a given sample
@@ -217,7 +217,7 @@ std::string format(const RecurrentStatistics<T, U, S> &stats) {
   }
 
   return output.str();
-};
+}
 
 } // namespace stats
 } // namespace arthoolbox
