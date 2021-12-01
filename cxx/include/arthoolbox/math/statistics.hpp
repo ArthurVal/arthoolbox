@@ -150,8 +150,7 @@ public:
    *  \return U the variance computed
    */
   S getVariance() const {
-    assert(number_of_measurements_ != 0) &&
-        "Need at least 1 measurement to compute the variance";
+    assert(number_of_measurements_ != 0 && "Need at least 1 measurement to compute the variance");
     return sum_square_ / number_of_measurements_;
   }
 
@@ -161,8 +160,8 @@ public:
    *  \return U the sampled variance computed
    */
   S getSampledVariance() const {
-    assert(number_of_measurements_ > 1) &&
-        "Need at least 2 measurement to compute the sample variance";
+    assert(number_of_measurements_ > 1 &&
+           "Need at least 2 measurement to compute the sample variance");
     return sum_square_ / (number_of_measurements_ - 1);
   }
 
