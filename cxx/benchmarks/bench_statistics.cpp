@@ -67,6 +67,27 @@ static void BM_ComputeRecurringMeanVariance(benchmark::State &state) {
 }
 BENCHMARK(BM_ComputeRecurringMeanVariance);
 
+static void BM_ComputeRecurringStatisticsCtor(benchmark::State &state) {
+  for (auto _ : state) {
+    RecurrentStatistics<double, double> stats;
+    benchmark::DoNotOptimize(stats);
+  }
+}
+BENCHMARK(BM_ComputeRecurringStatisticsCtor);
+
+static void BM_ComputeRecurringStatistics(benchmark::State &state) {
+  const auto& data = getRandomData();
+
+  for (auto _ : state) {
+    RecurrentStatistics<double, double> stats;
+
+    for(const auto &sample : data)
+      stats.updateWith(sample);
+
+    benchmark::DoNotOptimize(stats);
+  }
+}
+BENCHMARK(BM_ComputeRecurringStatistics);
 
 } // namespace stats
 } // namespace arthoolbox
