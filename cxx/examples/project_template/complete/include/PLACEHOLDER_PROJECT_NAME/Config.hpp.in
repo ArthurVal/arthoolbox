@@ -1,0 +1,87 @@
+#pragma once
+
+namespace PLACEHOLDER_PROJECT_NAMESPACE {
+namespace config {
+
+/** \struct VersionType "PLACEHOLDER_PROJECT_NAME/Config.hpp"
+ * @brief Data structure for versions number (major.minor.patch)
+ */
+struct VersionType {
+  unsigned major, /*!< Major version number */
+      minor,      /*!< Minor version number */
+      patch;      /*!< Patch version number */
+};
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs < rhs, false otherwise
+ */
+constexpr bool operator<(const VersionType& lhs, const VersionType& rhs) {
+  if (lhs.major != rhs.major) return lhs.major < rhs.major;
+  else if (lhs.minor != rhs.minor) return lhs.minor < rhs.minor;
+  else return lhs.patch < rhs.patch;
+}
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs > rhs, false otherwise
+ */
+constexpr bool operator>(const VersionType& lhs, const VersionType& rhs) {
+  return rhs < lhs;
+}
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs <= rhs, false otherwise
+ */
+constexpr bool operator<=(const VersionType& lhs, const VersionType& rhs) {
+  return not(lhs > rhs);
+}
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs >= rhs, false otherwise
+ */
+constexpr bool operator>=(const VersionType& lhs, const VersionType& rhs) {
+  return not(lhs < rhs);
+}
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs == rhs, false otherwise
+ */
+constexpr bool operator==(const VersionType& lhs, const VersionType& rhs) {
+  return ((lhs.major == rhs.major) && (lhs.minor == rhs.minor) &&
+          (lhs.patch == rhs.patch));
+}
+
+/**
+ * @brief Operator to compare version numbers
+ * @param[in] lhs Left-hand side member version of the operator
+ * @param[in] lhs Right-hand side member version of the operator
+ * @return return True if lhs != rhs, false otherwise
+ */
+constexpr bool operator!=(const VersionType& lhs, const VersionType& rhs) {
+  return not(lhs == rhs);
+}
+
+// clang-format off
+//! The version number given by CMake at build time
+constexpr VersionType version {
+  @PROJECT_VERSION_MAJOR@,
+  @PROJECT_VERSION_MINOR@,
+  @PROJECT_VERSION_PATCH@
+};
+// clang-format on
+}  // namespace config
+}  // namespace PLACEHOLDER_PROJECT_NAMESPACE
