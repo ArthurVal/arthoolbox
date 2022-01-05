@@ -1,3 +1,8 @@
+project(test_${PROJECT_NAME})
+
+message(STATUS "-- Build tests have been enabled")
+
+# GTest AUTO-DL ###############################################################
 if(${PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST})
   message(STATUS "Automatic GTest download requested: ...")
   if(${CMAKE_VERSION} VERSION_LESS 3.11)
@@ -37,4 +42,5 @@ if(${PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST})
   include(GoogleTest)
 endif(${PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST})
 
-# TODO
+# TEST - TEMPLATE #############################################################
+add_subdirectory(template)

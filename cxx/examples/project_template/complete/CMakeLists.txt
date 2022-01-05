@@ -5,7 +5,6 @@ project(PLACEHOLDER_PROJECT_NAME
   DESCRIPTION "PLACEHOLDER_PROJECT_DESCRIPTION"
   LANGUAGES CXX)
 
-
 include(CMakePrintHelpers)      #for cmake_print_variables & cmake_print_properties
 include(CMakeDependentOption)   #for cmake_dependent_option
 
@@ -17,7 +16,7 @@ cmake_print_variables(PLACEHOLDER_PROJECT_ACRONYM_ENABLE_TESTING)
 
 cmake_dependent_option(PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST
   "Enable the auto download of googletest lib" ON
-  PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST OFF)
+  PLACEHOLDER_PROJECT_ACRONYM_ENABLE_TESTING OFF)
 cmake_print_variables(PLACEHOLDER_PROJECT_ACRONYM_TESTING_DL_GTEST)
 
 option(PLACEHOLDER_PROJECT_ACRONYM_ENABLE_DOC "Build the doxygen documentation" OFF)
@@ -30,12 +29,13 @@ configure_file(
 add_subdirectory(src)
 
 if(${PLACEHOLDER_PROJECT_ACRONYM_ENABLE_TESTING})
-  add_custom_target(tests)
   enable_testing()
+  add_custom_target(tests)
   add_subdirectory(tests)
 endif(${PLACEHOLDER_PROJECT_ACRONYM_ENABLE_TESTING})
 
 if(${PLACEHOLDER_PROJECT_ACRONYM_ENABLE_BENCHMARK})
+  add_custom_target(benchmarks)
   add_subdirectory(benchmarks)
 endif(${PLACEHOLDER_PROJECT_ACRONYM_ENABLE_BENCHMARK})
 
