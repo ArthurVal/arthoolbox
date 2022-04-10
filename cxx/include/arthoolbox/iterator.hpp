@@ -6,12 +6,11 @@
 namespace arthoolbox {
 namespace iterator {
 
-template <class _Iterator,
-          typename std::iterator_traits<_Iterator>::difference_type _Stride>
+/**
+ * TODO
+ */
+template <class _Iterator>
 class strided_iterator {
- protected:
-  _Iterator _current;
-
   using __traits_type = std::iterator_traits<_Iterator>;
 
  public:
@@ -22,18 +21,22 @@ class strided_iterator {
   using reference = typename __traits_type::reference;
   using iterator_category = typename __traits_type::iterator_category;
 
-  static constexpr difference_type stride = _Stride;
+ protected:
+  _Iterator _current;
+  const difference_type _stride;
 
+ public:
   strided_iterator() = delete;
 
   /**
    * This iterator decorator will move multiple times, based on the _Stride,
    * when incremented/decremented.
    */
-  constexpr strided_iterator(_Iterator start) : _current(start) {}
+  constexpr strided_iterator(_Iterator start, const difference_type &stride)
+      : _current(start), _stride(stride) {}
 
   constexpr explicit strided_iterator(const strided_iterator &other)
-      : _current(other._current) {}
+      : _current(other._current), _stride(other._stride) {}
 
   strided_iterator &operator=(const strided_iterator &) = default;
 
@@ -42,20 +45,18 @@ class strided_iterator {
    * strided_iterator ONLY if their underlying _Iter type is convertible towards
    * _Iterator.
    */
-  template <
-      class _Iter, typename std::iterator_traits<_Iter>::difference_type _N,
-      typename std::enable_if<std::is_convertible<_Iter, _Iterator>::value,
-                              bool>::type = true>
-  constexpr strided_iterator(const strided_iterator<_Iter, _N> &other)
-      : _current(other._current) {}
+  template <class _Iter, typename std::enable_if<
+                             std::is_convertible<_Iter, _Iterator>::value,
+                             bool>::type = true>
+  constexpr strided_iterator(const strided_iterator<_Iter> &other)
+      : _current(other._current), _stride(other._stride) {}
 
-  template <
-      class _Iter, typename std::iterator_traits<_Iter>::difference_type _N,
-      typename std::enable_if<std::is_convertible<_Iter, _Iterator>::value,
-                              bool>::type = true>
-  constexpr strided_iterator &operator=(
-      const strided_iterator<_Iter, _N> &other) {
+  template <class _Iter, typename std::enable_if<
+                             std::is_convertible<_Iter, _Iterator>::value,
+                             bool>::type = true>
+  constexpr strided_iterator &operator=(const strided_iterator<_Iter> &other) {
     _current = other._current;
+    _stride = other._stride;
     return *this;
   }
 
@@ -63,6 +64,11 @@ class strided_iterator {
    * @return The current underlying iterator.
    */
   constexpr iterator_type base() const { return _current; }
+
+  /**
+   * @return The current stride used.
+   */
+  constexpr difference_type stride() const { return _stride; }
 
   /**
    * This require that _current is dereferenceable.
@@ -82,7 +88,7 @@ class strided_iterator {
    * @return *this
    */
   constexpr reference &operator++() {
-    std::advance(_current, stride);
+    std::advance(_current, _stride);
     return *this;
   }
 
@@ -109,7 +115,7 @@ class strided_iterator {
                                   iterator_category>::value,
                   "The iterator decorated must be BIDIRECTIONAL in order to "
                   "use (--foo) operator.");
-    std::advance(_current, -stride);
+    std::advance(_current, -_stride);
     return *this;
   }
 
@@ -135,12 +141,12 @@ class strided_iterator {
    *
    * @return A strided_iterator that refers to (_current + (n*stride))
    */
-  constexpr strided_iterator operator+(difference_type n) {
+  constexpr strided_iterator operator+(difference_type n) const {
     static_assert(std::is_base_of<std::random_access_iterator_tag,
                                   iterator_category>::value,
                   "The iterator decorated must be RANDOM ACCESS in order to "
                   "use (foo + N) operator.");
-    return strided_iterator(_current + (n * stride));
+    return strided_iterator(_current + (n * _stride));
   }
 
   /**
@@ -155,7 +161,7 @@ class strided_iterator {
                                   iterator_category>::value,
                   "The iterator decorated must be RANDOM ACCESS in order to "
                   "use (foo += N) operator.");
-    _current += (stride * n);
+    _current += (n * _stride);
     return *this;
   }
 
@@ -164,12 +170,12 @@ class strided_iterator {
    *
    * @return A strided_iterator that refers to (_current - (n*stride))
    */
-  constexpr strided_iterator operator-(difference_type n) {
+  constexpr strided_iterator operator-(difference_type n) const {
     static_assert(std::is_base_of<std::random_access_iterator_tag,
                                   iterator_category>::value,
                   "The iterator decorated must be RANDOM ACCESS in order to "
                   "use (foo - N) operator.");
-    return strided_iterator(_current - (n * stride));
+    return strided_iterator(_current - (n * _stride));
   }
 
   /**
@@ -184,7 +190,7 @@ class strided_iterator {
                                   iterator_category>::value,
                   "The iterator decorated must be RANDOM ACCESS in order to "
                   "use (foo -= N) operator.");
-    _current -= (stride * n);
+    _current -= (n * _stride);
     return *this;
   }
 
@@ -213,27 +219,21 @@ class strided_iterator {
   }
 };
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator==(const strided_iterator<_IterL, _NL> &lhs,
-                                 const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator==(const strided_iterator<_IterL> &lhs,
+                                 const strided_iterator<_IterR> &rhs) {
   return lhs.base() == rhs.base();
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator!=(const strided_iterator<_IterL, _NL> &lhs,
-                                 const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator!=(const strided_iterator<_IterL> &lhs,
+                                 const strided_iterator<_IterR> &rhs) {
   return not(lhs == rhs);
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator<(const strided_iterator<_IterL, _NL> &lhs,
-                                const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator<(const strided_iterator<_IterL> &lhs,
+                                const strided_iterator<_IterR> &rhs) {
   static_assert(
       std::is_base_of<std::random_access_iterator_tag,
                       typename decltype(lhs)::iterator_category>::value and
@@ -244,51 +244,36 @@ inline constexpr bool operator<(const strided_iterator<_IterL, _NL> &lhs,
   return lhs.base() < rhs.base();
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator>(const strided_iterator<_IterL, _NL> &lhs,
-                                const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator>(const strided_iterator<_IterL> &lhs,
+                                const strided_iterator<_IterR> &rhs) {
   return rhs < lhs;
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator<=(const strided_iterator<_IterL, _NL> &lhs,
-                                 const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator<=(const strided_iterator<_IterL> &lhs,
+                                 const strided_iterator<_IterR> &rhs) {
   return not(rhs < lhs);
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr bool operator>=(const strided_iterator<_IterL, _NL> &lhs,
-                                 const strided_iterator<_IterR, _NR> &rhs) {
+template <class _IterL, class _IterR>
+inline constexpr bool operator>=(const strided_iterator<_IterL> &lhs,
+                                 const strided_iterator<_IterR> &rhs) {
   return not(lhs < rhs);
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr auto operator+(const strided_iterator<_IterL, _NL> &lhs,
-                                const strided_iterator<_IterR, _NR> &rhs)
+template <class _IterL, class _IterR>
+inline constexpr auto operator+(const strided_iterator<_IterL> &lhs,
+                                const strided_iterator<_IterR> &rhs)
     -> decltype(lhs.base() + rhs.base()) {
   return lhs.base() + rhs.base();
 }
 
-template <
-    class _IterL, typename std::iterator_traits<_IterL>::difference_type _NL,
-    class _IterR, typename std::iterator_traits<_IterR>::difference_type _NR>
-inline constexpr auto operator-(const strided_iterator<_IterL, _NL> &lhs,
-                                const strided_iterator<_IterR, _NR> &rhs)
+template <class _IterL, class _IterR>
+inline constexpr auto operator-(const strided_iterator<_IterL> &lhs,
+                                const strided_iterator<_IterR> &rhs)
     -> decltype(lhs.base() - rhs.base()) {
   return lhs.base() - rhs.base();
-}
-
-template<class _Iterator, typename std::iterator_traits<_Iterator>::difference_type _N>
-inline constexpr strided_iterator<_Iterator, _N> make_strided_iterator(_Iterator it) {
-  return strided_iterator<_Iterator, _N>(it);
 }
 
 }  // namespace iterator
