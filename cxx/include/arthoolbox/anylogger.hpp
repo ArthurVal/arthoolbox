@@ -90,7 +90,7 @@ ANYLOG_CREATE_FUNCTION_TRAITS(debug);
 ANYLOG_CREATE_FUNCTION_TRAITS(info);
 ANYLOG_CREATE_FUNCTION_TRAITS(warn);
 ANYLOG_CREATE_FUNCTION_TRAITS(error);
-ANYLOG_CREATE_FUNCTION_TRAITS(fatal);
+ANYLOG_CREATE_FUNCTION_TRAITS(critical);
 
 #undef ANYLOG_CREATE_FUNCTION_TRAITS
 
@@ -109,7 +109,7 @@ ANYLOG_CREATE_FUNCTION_TRAITS(fatal);
  * - ::info_fn: Same as of debug_fn but for the info() function;
  * - ::warn_fn: Same as of debug_fn but for the warn() function;
  * - ::error_fn: Same as of debug_fn but for the error() function;
- * - ::fatal_fn: Same as of debug_fn but for the fatal() function;
+ * - ::critical_fn: Same as of debug_fn but for the critical() function;
  *
  *  \tparam T The LogPolicy
  */
@@ -121,7 +121,7 @@ struct log_policy_traits {
     using info_fn = typename _meta::info_function_traits<policy_type>;
     using warn_fn = typename _meta::warn_function_traits<policy_type>;
     using error_fn = typename _meta::error_function_traits<policy_type>;
-    using fatal_fn = typename _meta::fatal_function_traits<policy_type>;
+    using critical_fn = typename _meta::critical_function_traits<policy_type>;
 };
 
 /**
@@ -149,7 +149,7 @@ struct AnyLogger {
         virtual constexpr void info(std::string_view) const = 0;
         virtual constexpr void warn(std::string_view) const = 0;
         virtual constexpr void error(std::string_view) const = 0;
-        virtual constexpr void fatal(std::string_view) const = 0;
+        virtual constexpr void critical(std::string_view) const = 0;
     };
 
     template <class LogPolicy>
@@ -189,7 +189,7 @@ struct AnyLogger {
         ANYLOG_CREATE_LOG_WITH_LEVEL(info)
         ANYLOG_CREATE_LOG_WITH_LEVEL(warn)
         ANYLOG_CREATE_LOG_WITH_LEVEL(error)
-        ANYLOG_CREATE_LOG_WITH_LEVEL(fatal)
+        ANYLOG_CREATE_LOG_WITH_LEVEL(critical)
 
 #undef ANYLOG_CREATE_LOG_WITH_LEVEL
 
@@ -212,8 +212,8 @@ struct AnyLogger {
     inline void error(std::string_view msg) const {
         m_wrapper_ptr_->error(msg);
     }
-    inline void fatal(std::string_view msg) const {
-        m_wrapper_ptr_->fatal(msg);
+    inline void critical(std::string_view msg) const {
+        m_wrapper_ptr_->critical(msg);
     }
 
     AnyLogger() = delete;
@@ -257,7 +257,7 @@ struct NoLogs {
     static constexpr void info(std::string_view) {}
     static constexpr void warn(std::string_view) {}
     static constexpr void error(std::string_view) {}
-    static constexpr void fatal(std::string_view) {}
+    static constexpr void critical(std::string_view) {}
 };
 
 struct FmtLogs {
@@ -275,8 +275,8 @@ struct FmtLogs {
     void error(std::string_view msg) const {
         fmt::print(fmt_str, fmt::arg("msg", msg), fmt::arg("level", "ERROR"));
     }
-    void fatal(std::string_view msg) const {
-        fmt::print(fmt_str, fmt::arg("msg", msg), fmt::arg("level", "FATAL"));
+    void critical(std::string_view msg) const {
+        fmt::print(fmt_str, fmt::arg("msg", msg), fmt::arg("level", "CRITICAL"));
     }
 };
 
@@ -293,8 +293,8 @@ struct CoutLogs {
     static void error(std::string_view msg) {
         std::cout << "CoutLogs: ERROR: " << msg << '\n';
     }
-    static void fatal(std::string_view msg) {
-        std::cout << "CoutLogs: FATAL: " << msg << '\n';
+    static void critical(std::string_view msg) {
+        std::cout << "CoutLogs: CRITICAL: " << msg << '\n';
     }
 };
 
@@ -313,8 +313,8 @@ struct OstreamLogs {
     void error(std::string_view msg) const {
         os << "OstreamLogs: ERROR: " << msg << '\n';
     }
-    void fatal(std::string_view msg) const {
-        os << "OstreamLogs: FATAL: " << msg << '\n';
+    void critical(std::string_view msg) const {
+        os << "OstreamLogs: CRITICAL: " << msg << '\n';
     }
 };
 
@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
         log.info("CO");
         log.warn("LA");
         log.error("TI");
-        log.fatal("NE");
+        log.critical("NE");
         fmt::print("{}\n", bar);
     }
 
