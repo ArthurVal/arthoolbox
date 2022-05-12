@@ -23,9 +23,6 @@ namespace _meta {
 template <class, template <class...> class...>
 struct is_one_of : std::false_type {};
 
-template <template <class...> class T, class... U>
-struct is_one_of<T<U...>, T> : std::true_type {};
-
 template <template <class...> class T, class... U,
           template <class...> class... V>
 struct is_one_of<T<U...>, T, V...> : std::true_type {};
