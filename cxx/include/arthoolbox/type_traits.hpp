@@ -5,190 +5,157 @@
 namespace arthoolbox {
 namespace traits {
 /// Type holding a list of type from a parameter pack
-template <class... U> struct type_sequence {};
+template <class... T> struct TypeSequence {};
 
 /// Extract the first type T of a parameter pack
-template <class... U> struct head;
+template <class... T> struct Head;
 
-template <class T, class... U> struct head<type_sequence<T, U...>> {
+template <class... T> struct First : Head<T...> {};
+
+template <class T, class... U> struct Head<TypeSequence<T, U...>> {
   using type = T;
 };
 
-template <class T> using head_t = typename head<T>::type;
+template <class T> using Head_t = typename Head<T>::type;
+
+template <class T> using First_t = typename First<T>::type;
 
 /// Extract the list of type ...U AFTER the first type T of a parameter pack
-template <class... U> struct tail;
+template <class... U> struct Tail;
 
-template <class T, class... U> struct tail<type_sequence<T, U...>> {
-  using type = type_sequence<U...>;
+template <class T, class... U> struct Tail<TypeSequence<T, U...>> {
+  using type = TypeSequence<U...>;
 };
 
-template <class T> using tail_t = typename tail<T>::type;
+template <> struct Tail<TypeSequence<>> { using type = TypeSequence<>; };
+
+template <class T> using Tail_t = typename Tail<T>::type;
 
 /// Create a new type_sequence by adding T at the begining of the sequence
-template <class T, class TypeSequence> struct cons;
+template <class... T> struct Cons;
 
-template <class T, class... U> struct cons<T, type_sequence<U...>> {
-  using type = type_sequence<T, U...>;
+template <class T, class U> struct Cons<T, U> {
+  using type = TypeSequence<T, U>;
 };
 
-template <class T, class TypeSequence>
-using cons_t = typename cons<T, TypeSequence>::type;
+template <class T, class... U> struct Cons<T, TypeSequence<U...>> {
+  using type = TypeSequence<T, U...>;
+};
 
-/// Simply checks if T is a type_sequence
-template <class T> struct is_type_sequence : std::false_type {};
+template <class... T, class U> struct Cons<TypeSequence<T...>, U> {
+  using type = TypeSequence<T..., U>;
+};
 
-template <class... Args>
-struct is_type_sequence<type_sequence<Args...>> : std::true_type {};
+template <class... T, class... U>
+struct Cons<TypeSequence<T...>, TypeSequence<U...>> {
+  using type = TypeSequence<T..., U...>;
+};
 
-/// Get the size of a type_sequence
-template <class T> struct type_sequence_size;
+template <class... T> using Cons_t = typename Cons<T...>::type;
+
+/// Extract the last type of TypeSequence
+template <class... T> struct Last;
+
+template <class T> struct Last<TypeSequence<T>> { using type = T; };
 
 template <class... T>
-struct type_sequence_size<type_sequence<T...>>
-    : std::integral_constant<std::size_t, sizeof...(T)> {};
+struct Last<TypeSequence<T...>> : Last<Tail_t<TypeSequence<T...>>> {};
 
-template <class T>
-constexpr std::size_t type_sequence_size_v = type_sequence_size<T>::value;
+template <class T> using Last_t = typename Last<T>::type;
 
-/// Find the index of T inside the parameter pack Pack. Return Start +
-/// sizeof...(Pack) if failure.
-template <std::size_t Start, class Type, class... Pack> struct get_index_of;
-
-template <std::size_t Idx, class T, class U, class... Rest>
-struct get_index_of<Idx, T, U, Rest...> : get_index_of<Idx + 1, T, Rest...> {};
-
-template <std::size_t Idx, class T, class... Rest>
-struct get_index_of<Idx, T, T, Rest...>
-    : std::integral_constant<std::size_t, Idx> {};
-
-template <std::size_t Idx, class T>
-struct get_index_of<Idx, T> : std::integral_constant<std::size_t, Idx + 1> {};
-
-template <std::size_t Idx, class T, class... Pack>
-struct get_index_of<Idx, T, type_sequence<Pack...>>
-    : get_index_of<Idx, T, Pack...> {};
-
-template <std::size_t Start, class T, class... Pack>
-constexpr std::size_t get_index_of_v = get_index_of<Start, T, Pack...>::value;
-
-/// Create a type_sequence representing a sub_view of types from a given
-/// parameter pack.
-template <std::size_t begin, std::size_t end, std::size_t idx, class = void,
-          class... Pack>
-struct sub_view;
-
-template <std::size_t begin, std::size_t end, std::size_t idx, class First,
-          class... Pack>
-struct sub_view<begin, end, idx, std::enable_if_t<(idx < begin)>, First,
-                Pack...> {
-  using type = typename sub_view<begin, end, idx + 1, void, Pack...>::type;
+/// Get the size of a TypeSequence
+template <class... T> struct SizeOf {
+  static constexpr auto value = sizeof...(T);
 };
 
-template <std::size_t begin, std::size_t end, class First, class... Pack>
-struct sub_view<begin, end, begin, void, First, Pack...> {
-  using type = typename sub_view<begin, end, begin + 1, void,
-                                 type_sequence<First>, Pack...>::type;
+template <class... T> struct SizeOf<TypeSequence<T...>> : SizeOf<T...> {};
+
+template <class T> constexpr auto SizeOf_v = SizeOf<T>::value;
+
+/// Get the Type T at index I in Sequence
+template <class Sequence, std::size_t I, std::size_t Idx>
+struct AtImpl : AtImpl<Tail_t<Sequence>, I, Idx + 1> {
+  static_assert(Idx < I);
 };
 
-template <std::size_t begin, std::size_t end, std::size_t idx, class First,
-          class... Types, class... Pack>
-struct sub_view<begin, end, idx,
-                std::enable_if_t<(idx > begin) and (idx < end)>,
-                type_sequence<Types...>, First, Pack...> {
-  using type = typename sub_view<begin, end, idx + 1, void,
-                                 type_sequence<Types..., First>, Pack...>::type;
+template <std::size_t I, class Sequence>
+struct AtImpl<Sequence, I, I> : Head<Sequence> {};
+
+template <class Sequence, std::size_t I> struct At : AtImpl<Sequence, I, 0> {
+  static_assert(I < SizeOf_v<Sequence>);
 };
 
-template <std::size_t begin, std::size_t end, class... Types, class... Pack>
-struct sub_view<begin, end, end, void, type_sequence<Types...>, Pack...> {
-  using type = type_sequence<Types...>;
+template <class Sequence, std::size_t I>
+using At_t = typename At<Sequence, I>::type;
+
+/// Create a sub sequence from given indexes
+template <class InSequence, class OutSequence, std::size_t... Indexes>
+struct SubViewImpl;
+
+template <class InSequence, class OutSequence, std::size_t I,
+          std::size_t... Others>
+struct SubViewImpl<InSequence, OutSequence, I, Others...>
+    : SubViewImpl<InSequence, Cons_t<OutSequence, At_t<InSequence, I>>,
+                  Others...> {};
+
+template <class InSequence, class OutSequence, std::size_t I>
+struct SubViewImpl<InSequence, OutSequence, I>
+    : Cons<OutSequence, At_t<InSequence, I>> {};
+
+template <class InSequence, class OutSequence>
+struct SubViewImpl<InSequence, OutSequence> {
+  using type = OutSequence;
 };
 
-template <std::size_t begin, std::size_t end, class... Pack>
-using sub_view_t = typename sub_view<begin, end, 0, void, Pack...>::type;
+template <class Sequence, class IdxSeq> struct SubView;
 
-/// Transform a TypeSequence<U...> into TypeSequence<T<U>...>.
-template <template <class...> class T, class TypeSequence> struct transform;
+template <class Sequence, std::size_t... Indexes>
+struct SubView<Sequence, std::integer_sequence<std::size_t, Indexes...>>
+    : SubViewImpl<Sequence, TypeSequence<>, Indexes...> {};
+
+template <class Sequence, class IdxSeq>
+using SubView_t = typename SubView<Sequence, IdxSeq>::type;
+
+/// Offset a std::index_sequence by N
+template <std::size_t N, class IdxSeq> struct OffsetIndexSequence;
+
+template <std::size_t N, std::size_t... Indexes>
+struct OffsetIndexSequence<N, std::integer_sequence<std::size_t, Indexes...>> {
+  using type = std::integer_sequence<std::size_t, (Indexes + N)...>;
+};
+
+template <std::size_t N, class IdxSeq>
+using OffsetIndexSequence_t = typename OffsetIndexSequence<N, IdxSeq>::type;
+
+/// Inside a Sequence, replace the type at index I, by NewT
+template <class Sequence, std::size_t I, class NewT> struct Replace {
+  static_assert(I < SizeOf_v<Sequence>);
+  using Before_I = SubView_t<Sequence, std::make_index_sequence<I>>;
+  using After_I =
+      SubView_t<Sequence,
+                OffsetIndexSequence_t<I + 1, std::make_index_sequence<
+                                                 SizeOf_v<Sequence> - I - 1>>>;
+
+public:
+  using type = Cons_t<Before_I, Cons_t<NewT, After_I>>;
+};
+
+template <class Sequence, class NewT>
+struct Replace<Sequence, 0, NewT> : Cons<NewT, Tail_t<Sequence>> {};
+
+template <class Sequence, std::size_t I, class NewT>
+using Replace_t = typename Replace<Sequence, I, NewT>::type;
+
+/// Create T using all types contained within the TypeSequence
+template <template <class...> class T, class TypeSequence> struct FromSequence;
 
 template <template <class...> class T, class... Types>
-struct transform<T, type_sequence<Types...>> {
-  using type = type_sequence<T<Types>...>;
-};
-
-template <template <class...> class T, class TypeSequence>
-using transform_t = typename transform<T, TypeSequence>::type;
-
-/// Transform a TypeSequence<U...>  TypeSequence<V...>, into TS<T<U,V>...>.
-template <template <class...> class T, class TypeSequence1, class TypeSequence2>
-struct transform_2;
-
-template <template <class...> class T, class... Types1, class... Types2>
-struct transform_2<T, type_sequence<Types1...>, type_sequence<Types2...>> {
-  static_assert(sizeof...(Types1) == sizeof...(Types2));
-  using type = type_sequence<T<Types1, Types2>...>;
-};
-
-template <template <class...> class T, class TypeSequence1, class TypeSequence2>
-using transform_2_t =
-    typename transform_2<T, TypeSequence1, TypeSequence2>::type;
-
-/// Reduce the Typesequence<U...> into T, as of T<U...>
-template <class TypeSequence, template <class...> class T> struct reduce;
-
-template <template <class...> class T, class... Types>
-struct reduce<type_sequence<Types...>, T> {
+struct FromSequence<T, TypeSequence<Types...>> {
   using type = T<Types...>;
 };
 
-template <class TypeSequence, template <class...> class T>
-using reduce_t = typename reduce<TypeSequence, T>::type;
-
-/// Test if all types in T... are unique
-template <class... T> struct all_different;
-
-template <class... T>
-struct all_different<type_sequence<T...>> : all_different<T...> {};
-
-template <class T> struct all_different<T> : std::true_type {};
-
-template <class T1, class T2, class... Ts>
-struct all_different<T1, T2, Ts...>
-    : std::conjunction<all_different<T1, T2>, all_different<T1, Ts...>,
-                       all_different<T2, Ts...>> {};
-
-template <class T1, class T2>
-struct all_different<T1, T2> : std::negation<std::is_same<T1, T2>> {};
-
-template <class... T>
-constexpr bool all_different_v = all_different<T...>::value;
-
-/// Test if T is dereferenceable
-template <class T, class = void> struct is_dereferenceable : std::false_type {};
-
-template <class T>
-struct is_dereferenceable<T, std::void_t<decltype(*std::declval<T>())>>
-    : std::true_type {};
-
-template <class T>
-constexpr bool is_dereferenceable_v = is_dereferenceable<T>::value;
-
-/// Test if T is testable
-template <class T, class = void> struct is_testable : std::false_type {};
-
-template <class T>
-struct is_testable<T, std::void_t<decltype(bool(std::declval<T>()))>>
-    : std::true_type {};
-
-template <class T> constexpr bool is_testable_v = is_testable<T>::value;
-
-/// TODO
-template <class T, template <class> class... U> struct chain;
-
-template <class T, template <class> class U, template <class> class... V>
-struct chain<T, U, V...> : chain<typename U<T>::type, V...> {};
-
-template <class T, template <class> class U> struct chain<T, U> : U<T> {};
+template <template <class...> class T, class TypeSequence>
+using FromSequence_t = typename FromSequence<T, TypeSequence>::type;
 
 } // namespace traits
 } // namespace arthoolbox
