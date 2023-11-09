@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stddef.h> /* size_t */
 
-#include "atb/core/String.h"
+#include "String.h"
 
 /**
  *  \brief Dynamic process arguments list builder used by Process_Launch
