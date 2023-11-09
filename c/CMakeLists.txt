@@ -1,0 +1,51 @@
+add_library(${PROJECT_NAME}-core
+  String.c
+  FdUtils.c
+  Process.c
+  )
+
+add_library(${PROJECT_NAME}::core ALIAS ${PROJECT_NAME}-core)
+
+target_include_directories(${PROJECT_NAME}-core
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+
+  PRIVATE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+  )
+
+target_compile_options(${PROJECT_NAME}-core
+  PRIVATE
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Wshadow
+  -Wdouble-promotion
+  -Wundef
+  -Wconversion
+  # -Werror
+  )
+
+set_target_properties(${PROJECT_NAME}-core
+  PROPERTIES
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  VERSION ${PROJECT_VERSION}
+  INTERFACE_${PROJECT_NAME}_MAJOR_VERSION ${PROJECT_VERSION_MAJOR}
+  COMPATIBLE_INTERFACE_STRING ${PROJECT_VERSION_MAJOR}
+  DEBUG_POSTFIX "-debug"
+  )
+
+install(
+  TARGETS ${PROJECT_NAME}-core
+  EXPORT ${PROJECT_NAME}Core
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+
+install(EXPORT ${PROJECT_NAME}Core
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+  )
