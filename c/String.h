@@ -5,7 +5,7 @@
 #include <stddef.h>  /* size_t */
 #include <string.h>  /* strlen */
 
-#include "atb/core/StaticArray.h" /* GetSize */
+#include "StaticArray.h" /* GetSize */
 
 /**
  *  \brief Dynamic c-string container on the heap
