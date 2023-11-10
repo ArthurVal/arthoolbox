@@ -50,13 +50,13 @@ struct atb_DLinkedList {
 };
 
 /**
- *  \brief Statically initialize a atb_DLinkedList (set prev & next to itself)
+ *  \brief Statically initialize an atb_DLinkedList (set prev & next to itself)
  */
 #define atb_DLinkedList_HEAD_INITIALIZER(name)                                 \
   { &(name), &(name) }
 
 /**
- *  \brief Initialize a atb_DLinkedList (set prev & next to itself)
+ *  \brief Initialize an atb_DLinkedList (set prev & next to itself)
  */
 static inline void atb_DLinkedList_Init(struct atb_DLinkedList *list) {
   assert(list);
@@ -66,7 +66,10 @@ static inline void atb_DLinkedList_Init(struct atb_DLinkedList *list) {
 }
 
 /**
- *  \brief Forward connect first to next (DO NOT INSERT)
+ *  \brief Connects second as the next node of first (and vice versa)
+ *
+ *  \warning This is not meant to be used directly as an INSERTION into
+ *           a list
  */
 static inline void atb_DLinkedList_Connect(struct atb_DLinkedList *first,
                                            struct atb_DLinkedList *second) {
