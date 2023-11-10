@@ -90,7 +90,7 @@ atb_DLinkedList_InsertAfter(struct atb_DLinkedList *node,
 }
 
 /**
- *  \brief Insert new_node AFTER node (node->prev)
+ *  \brief Insert new_node BEFORE node (node->prev)
  */
 static inline void
 atb_DLinkedList_InsertBefore(struct atb_DLinkedList *node,
