@@ -12,8 +12,8 @@
  */
 struct atb_String {
   char *data;
-  size_t capacity;
   size_t size;
+  size_t capacity;
 };
 
 /**
